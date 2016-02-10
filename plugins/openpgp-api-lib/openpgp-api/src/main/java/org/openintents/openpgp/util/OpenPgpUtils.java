@@ -36,13 +36,28 @@ public class OpenPgpUtils {
             ".*?(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*",
             Pattern.DOTALL);
 
+    public static final Pattern PGP_MESSAGE_ANCHORED = Pattern.compile(
+            "(-----BEGIN PGP MESSAGE-----.*?-----END PGP MESSAGE-----).*",
+            Pattern.DOTALL);
+
+    public static final Pattern PGP_SIGNED_MESSAGE_ANCHORED = Pattern.compile(
+            "(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*",
+            Pattern.DOTALL);
+
     public static final int PARSE_RESULT_NO_PGP = -1;
     public static final int PARSE_RESULT_MESSAGE = 0;
     public static final int PARSE_RESULT_SIGNED_MESSAGE = 1;
 
     public static int parseMessage(String message) {
-        Matcher matcherSigned = PGP_SIGNED_MESSAGE.matcher(message);
-        Matcher matcherMessage = PGP_MESSAGE.matcher(message);
+        return parseMessage(message, false);
+    }
+
+    public static int parseMessage(String message, boolean anchorToStart) {
+        Pattern signedPattern = anchorToStart ? PGP_SIGNED_MESSAGE_ANCHORED : PGP_SIGNED_MESSAGE;
+        Matcher matcherSigned = signedPattern.matcher(message);
+
+        Pattern messagePattern = anchorToStart ? PGP_MESSAGE_ANCHORED : PGP_MESSAGE;
+        Matcher matcherMessage = messagePattern.matcher(message);
 
         if (matcherMessage.matches()) {
             return PARSE_RESULT_MESSAGE;
